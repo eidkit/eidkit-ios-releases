@@ -15,12 +15,12 @@ let package = Package(
         .binaryTarget(
             name: "EidKit",
             url: "https://github.com/eidkit/eidkit-ios-releases/releases/download/v0.1.3/EidKit-0.1.3.xcframework.zip",
-            checksum: "a6ccc20d44cc0d03b8cf83d840a44858f078a957bb71d57fae0fba06778830d8"
+            checksum: "4c653b5e07d9d83b032c597a04c12ff1a9729a38c91f1eeaca9198054606d553"
         ),
         .binaryTarget(
             name: "EidKitOtlp",
             url: "https://github.com/eidkit/eidkit-ios-releases/releases/download/v0.1.3/EidKitOtlp-0.1.3.xcframework.zip",
-            checksum: "8ce694ac42c4373711ea7fd3875495d3c2a0c28ac41b75c44e2332de1c26e900"
+            checksum: "b806f42af8cc480a311e81ea81cbd272c0a83188193cc663b46273d155a9b64a"
         )
     ]
 )
