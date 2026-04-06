@@ -10,12 +10,21 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/open-telemetry/opentelemetry-swift-core.git", from: "2.3.0"),
+        .package(url: "https://github.com/krzyzanowskim/OpenSSL", from: "3.6.0000"),
     ],
     targets: [
         .binaryTarget(
-            name: "EidKit",
+            name: "EidKitCore",
             url: "https://github.com/eidkit/eidkit-ios-releases/releases/download/v0.1.3/EidKit-0.1.3.xcframework.zip",
             checksum: "5767230daebfb7e2b04f4b0d10d5c6b9380e679eb1dfab2322ca61b720565d58"
+        ),
+        .target(
+            name: "EidKit",
+            dependencies: [
+                "EidKitCore",
+                .product(name: "OpenSSL", package: "OpenSSL"),
+            ],
+            path: "Sources/EidKit"
         ),
         .target(
             name: "EidKitOtlp",
