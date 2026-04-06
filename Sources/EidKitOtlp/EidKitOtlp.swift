@@ -1,6 +1,100 @@
 import Foundation
+import EidKit
 import OpenTelemetryApi
 import OpenTelemetrySdk
+
+// MARK: - EidKitSpanAdapter
+
+/// Converts `EidKitSpan` callback events into OpenTelemetry spans.
+///
+/// Buffers all spans in a session and emits them in parent-first order once the root
+/// `eidkit.session` span completes. This reconstructs the full parent-child waterfall
+/// in Jaeger, Sentry, Grafana Tempo, and any other W3C-compatible backend.
+///
+/// **Usage:**
+/// ```swift
+/// let provider = TracerProviderBuilder()
+///     .add(spanProcessor: SimpleSpanProcessor(spanExporter: myExporter))
+///     .build()
+/// OpenTelemetry.registerTracerProvider(tracerProvider: provider)
+///
+/// let adapter = EidKitSpanAdapter(
+///     tracer: provider.get(instrumentationName: "io.eidkit.sdk")
+/// )
+/// try EidKitSdk.configure(EidKitConfig(onSpan: adapter.onSpan))
+/// ```
+///
+/// Hold a strong reference to `EidKitSpanAdapter` for the lifetime of your app.
+public final class EidKitSpanAdapter {
+
+    private let tracer: any Tracer
+    private let lock = NSLock()
+    private var buffer: [EidKitSpan] = []
+
+    public init(tracer: any Tracer) {
+        self.tracer = tracer
+    }
+
+    /// Pass this closure to `EidKitConfig.onSpan`.
+    public var onSpan: (EidKitSpan) -> Void {
+        return { [weak self] span in self?.receive(span) }
+    }
+
+    private func receive(_ span: EidKitSpan) {
+        lock.lock()
+        buffer.append(span)
+        let shouldFlush = span.parentSpanId == nil
+        lock.unlock()
+        if shouldFlush { flush() }
+    }
+
+    private func flush() {
+        lock.lock()
+        let spans = buffer
+        buffer.removeAll()
+        lock.unlock()
+
+        // Build parent → [children] map
+        var children: [String: [EidKitSpan]] = [:]
+        var root: EidKitSpan?
+        for span in spans {
+            if let p = span.parentSpanId {
+                children[p, default: []].append(span)
+            } else {
+                root = span
+            }
+        }
+        guard let root else { return }
+
+        // Emit root-first (DFS) so each parent OTel span exists before its children.
+        // This gives correct parentSpanId linkage in the backend.
+        func emit(_ span: EidKitSpan, parent: (any Span)?) {
+            let builder = tracer
+                .spanBuilder(spanName: span.name)
+                .setSpanKind(spanKind: .internal)
+                .setStartTime(time: span.startTime)
+            if let parent { _ = builder.setParent(parent) }
+            let otelSpan = builder.startSpan()
+            for (key, value) in span.attributes {
+                switch value {
+                case .string(let s): otelSpan.setAttribute(key: key, value: s)
+                case .int(let i):    otelSpan.setAttribute(key: key, value: i)
+                }
+            }
+            if case .error(let desc) = span.status {
+                otelSpan.status = Status.error(description: desc)
+            }
+            otelSpan.end(time: span.endTime)
+            for child in children[span.spanId] ?? [] {
+                emit(child, parent: otelSpan)
+            }
+        }
+
+        emit(root, parent: nil)
+    }
+}
+
+
 
 // MARK: - OtlpHttpSpanExporter
 
