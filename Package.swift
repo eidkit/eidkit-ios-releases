@@ -16,7 +16,7 @@ let package = Package(
         .binaryTarget(
             name: "EidKit",
             url: "https://github.com/eidkit/eidkit-ios-releases/releases/download/v0.1.4/EidKit-0.1.4.xcframework.zip",
-            checksum: "4a299634862a110ba37d8a16a7733ff44df4414245ff1fd1d266662836a8861b"
+            checksum: "4f53e06667cebc3e7f5ab352b8f9d11a8974b8b74f2f2339b251c7e706988e54"
         ),
         .target(
             name: "EidKitRuntime",
@@ -28,7 +28,7 @@ let package = Package(
         .target(
             name: "EidKitOtlp",
             dependencies: [
-                .product(name: "OpenTelemetryApi", package: "opentelemetry-swift-core"),
+                "EidKit",
                 .product(name: "OpenTelemetrySdk", package: "opentelemetry-swift-core"),
             ],
             path: "Sources/EidKitOtlp"
