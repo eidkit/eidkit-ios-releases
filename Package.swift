@@ -5,7 +5,7 @@ let package = Package(
     name: "EidKit",
     platforms: [.iOS(.v15)],
     products: [
-        .library(name: "EidKit", targets: ["EidKit"]),
+        .library(name: "EidKit", targets: ["EidKit", "EidKitRuntime"]),
         .library(name: "EidKitOtlp", targets: ["EidKitOtlp"])
     ],
     dependencies: [
@@ -14,17 +14,16 @@ let package = Package(
     ],
     targets: [
         .binaryTarget(
-            name: "EidKitCore",
+            name: "EidKit",
             url: "https://github.com/eidkit/eidkit-ios-releases/releases/download/v0.1.3/EidKit-0.1.3.xcframework.zip",
             checksum: "5767230daebfb7e2b04f4b0d10d5c6b9380e679eb1dfab2322ca61b720565d58"
         ),
         .target(
-            name: "EidKit",
+            name: "EidKitRuntime",
             dependencies: [
-                "EidKitCore",
                 .product(name: "OpenSSL", package: "OpenSSL"),
             ],
-            path: "Sources/EidKit"
+            path: "Sources/EidKitRuntime"
         ),
         .target(
             name: "EidKitOtlp",
