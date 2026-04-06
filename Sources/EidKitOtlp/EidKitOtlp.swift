@@ -147,11 +147,9 @@ public final class OtlpHttpSpanExporter: SpanExporter {
         let sem = DispatchSemaphore(value: 0)
         var result: SpanExporterResultCode = .success
         URLSession.shared.dataTask(with: req) { _, res, err in
-            if let err {
-                print("[EidKitOtlp] export error: \(err.localizedDescription)")
+            if err != nil {
                 result = .failure
             } else if let http = res as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
-                print("[EidKitOtlp] HTTP \(http.statusCode)")
                 result = .failure
             }
             sem.signal()
