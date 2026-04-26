@@ -15,8 +15,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "EidKit",
-            url: "https://github.com/eidkit/eidkit-ios-releases/releases/download/v0.1.10/EidKit-0.1.10.xcframework.zip",
-            checksum: "c4eb72cc4af43c4c6b958713f94d0960cd370a1d8c22af22fa1b1304959eb47e"
+            url: "https://github.com/eidkit/eidkit-ios-releases/releases/download/v0.1.11/EidKit-0.1.11.xcframework.zip",
+            checksum: "ef1b9466095e0ca118f8fadbd7378746827b41be338671a6fae9a8619ff2e75f"
         ),
         .target(
             name: "EidKitRuntime",
